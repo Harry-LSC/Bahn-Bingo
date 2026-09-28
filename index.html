@@ -14,8 +14,91 @@ function renderPreview(){render($("pboard"),false);$("custom").value=s.custom?s.
 function start(){s.started=true;show("game");renderGame()}function toggle(i){if(i===12&&!s.custom){s.cells[i].marked=true;s.won=true;save();renderGame();win(true);return}s.cells[i].marked=!s.cells[i].marked;let b=bingo();if(b&&!s.won){s.won=true;save();renderGame();win(false)}else{if(!b)s.won=false;save();renderGame()}}
 function bingo(){let m=s.cells.map(c=>c.marked),z=[];for(let r=0;r<5;r++)z.push([0,1,2,3,4].map(c=>r*5+c));for(let c=0;c<5;c++)z.push([0,1,2,3,4].map(r=>r*5+c));z.push([0,6,12,18,24],[4,8,12,16,20]);return z.some(a=>a.every(i=>m[i]))}
 function win(center){$("wtitle").textContent=center?"UNGLAUBLICH.":"BINGO!";$("wtext").innerHTML=center?"DIE BAHN IST PÜNKTLICH.<br>DU HAST GEWONNEN.<br>GEH NACH HAUSE.":"Immerhin etwas hat heute funktioniert.";$("win").classList.remove("hide")}
-function wrap(ctx,t,w){let out=[],line="";for(const q of t.split(/s+/)){let x=line?line+" "+q:q;if(ctx.measureText(x).width>w&&line){out.push(line);line=q}else line=x}if(line)out.push(line);return out}
-async function imageBlob(){let cv=document.createElement("canvas");cv.width=1600;cv.height=1900;let x=cv.getContext("2d");x.fillStyle="#f3efe4";x.fillRect(0,0,1600,1900);let im=new Image;im.src=L;try{await im.decode()}catch(e){}if(im.naturalWidth)x.drawImage(im,420,35,760,253);x.fillStyle="#111";x.textAlign="center";x.font="700 32px Arial";x.fillText("Mach wenigstens ein Bingo daraus.",800,260);let M=70,bs=1460,cs=bs/5,y0=310;x.textBaseline="middle";s.cells.forEach((c,i)=>{let r=Math.floor(i/5),col=i%5,xx=M+col*cs,yy=y0+r*cs;x.fillStyle=i===12?"#fff1f1":"#fffdf8";x.fillRect(xx,yy,cs,cs);x.strokeStyle=i===12?"#e20015":"#111";x.lineWidth=5;x.strokeRect(xx,yy,cs,cs);x.fillStyle=i===12?"#700008":"#111";x.font="700 27px Arial";let ls=wrap(x,c.text,cs-34),lh=31,sy=yy+cs/2-(ls.length-1)*lh/2;ls.slice(0,7).forEach((q,k)=>x.fillText(q,xx+cs/2,sy+k*lh));if(c.marked){x.strokeStyle="rgba(226,0,21,.9)";x.lineWidth=18;x.beginPath();x.moveTo(xx+35,yy+35);x.lineTo(xx+cs-35,yy+cs-35);x.moveTo(xx+cs-35,yy+35);x.lineTo(xx+35,yy+cs-35);x.stroke()}});x.fillStyle="#6b675f";x.font="24px Arial";x.fillText("Inoffizielles Fanprojekt – nicht mit der Deutschen Bahn verbunden.",800,1830);return new Promise(r=>cv.toBlob(r,"image/png"))}
+function wrapAtSize(ctx,text,maxWidth,fontSize){
+  ctx.font="700 "+fontSize+"px Arial";
+  const words=String(text).trim().split(/\s+/);
+  const lines=[]; let line="";
+  for(let word of words){
+    if(ctx.measureText(word).width>maxWidth){
+      if(line){lines.push(line);line=""}
+      let piece="";
+      for(const ch of word){
+        const test=piece+ch;
+        if(ctx.measureText(test).width>maxWidth&&piece){lines.push(piece);piece=ch}else piece=test;
+      }
+      if(piece) line=piece;
+      continue;
+    }
+    const test=line?line+" "+word:word;
+    if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test;
+  }
+  if(line)lines.push(line);
+  return lines;
+}
+function fitCellText(ctx,text,maxWidth,maxHeight){
+  for(let fs=32;fs>=17;fs--){
+    const lines=wrapAtSize(ctx,text,maxWidth,fs);
+    const lh=Math.round(fs*1.12);
+    if(lines.length<=7&&lines.length*lh<=maxHeight)return{fs,lines,lh};
+  }
+  const fs=16, lines=wrapAtSize(ctx,text,maxWidth,fs), lh=18;
+  return{fs,lines:lines.slice(0,7),lh};
+}
+async function imageBlob(){
+  const cv=document.createElement("canvas");
+  cv.width=1600; cv.height=1900;
+  const x=cv.getContext("2d");
+  x.fillStyle="#f3efe4"; x.fillRect(0,0,1600,1900);
+
+  // Logo only. No slogan/header text competing with it.
+  const im=new Image(); im.src=L;
+  try{await im.decode()}catch(e){}
+  if(im.naturalWidth){
+    const logoW=650, logoH=logoW*(im.naturalHeight/im.naturalWidth);
+    x.drawImage(im,(1600-logoW)/2,55,logoW,logoH);
+  }
+
+  const margin=95, boardSize=1410, cell=boardSize/5, y0=330;
+  x.textAlign="center"; x.textBaseline="middle";
+
+  s.cells.forEach((item,i)=>{
+    const row=Math.floor(i/5), col=i%5;
+    const xx=margin+col*cell, yy=y0+row*cell;
+
+    x.fillStyle=i===12?"#fff1f1":"#fffdf8";
+    x.fillRect(xx,yy,cell,cell);
+    x.strokeStyle=i===12?"#e20015":"#111";
+    x.lineWidth=5;
+    x.strokeRect(xx,yy,cell,cell);
+
+    // Keep all text safely inside each square.
+    const pad=22;
+    const fitted=fitCellText(x,item.text,cell-pad*2,cell-pad*2);
+    x.font="700 "+fitted.fs+"px Arial";
+    x.fillStyle=i===12?"#700008":"#111";
+    const totalH=(fitted.lines.length-1)*fitted.lh;
+    const firstY=yy+cell/2-totalH/2;
+    fitted.lines.forEach((line,k)=>x.fillText(line,xx+cell/2,firstY+k*fitted.lh));
+
+    if(item.marked){
+      x.save();
+      x.strokeStyle="rgba(226,0,21,.88)";
+      x.lineWidth=18;
+      x.lineCap="round";
+      x.beginPath();
+      x.moveTo(xx+34,yy+34); x.lineTo(xx+cell-34,yy+cell-34);
+      x.moveTo(xx+cell-34,yy+34); x.lineTo(xx+34,yy+cell-34);
+      x.stroke();
+      x.restore();
+    }
+  });
+
+  x.fillStyle="#6b675f";
+  x.font="22px Arial";
+  x.fillText("Inoffizielles Fanprojekt · nicht mit der Deutschen Bahn verbunden.",800,1830);
+
+  return new Promise(resolve=>cv.toBlob(resolve,"image/png"));
+}
 async function share(){let b=await imageBlob(),file=new File([b],"bahn-bingo.png",{type:"image/png"});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({title:"Bahn Bingo",text:"Meine Bahn-Bingo-Karte",files:[file]});return}catch(e){if(e.name==="AbortError")return}}if(shareUrl)URL.revokeObjectURL(shareUrl);shareUrl=URL.createObjectURL(b);$("shot").src=shareUrl;$("dl").href=shareUrl;$("shareBox").classList.remove("hide")}
 $("gen").onclick=generate;$("regen").onclick=generate;$("play").onclick=start;$("apply").onclick=()=>{let v=$("custom").value.trim();s.cells[12].text=v||C;s.custom=!!v;s.cells[12].marked=false;s.won=false;save();renderPreview()};$("share").onclick=share;document.querySelectorAll(".homeBtn").forEach(b=>b.onclick=()=>show("home"));$("wclose").onclick=()=>$("win").classList.add("hide");$("sclose").onclick=()=>$("shareBox").classList.add("hide");
 try{s=JSON.parse(localStorage.getItem(K)||"null")}catch(e){}if(s&&s.cells?.length===25){if(s.started||s.screen==="game"){renderGame();show("game")}else if(s.screen==="preview"){renderPreview();show("preview")}else show("home")}else show("home");
