@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3efe4">
+<title>Datenschutz · D Bingo</title>
+<style>
+:root{--c:#f3efe4;--p:#fffdf8;--r:#e20015;--i:#111;--m:#6b675f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c);color:var(--i);font-family:Arial,sans-serif}
+.wrap{max-width:760px;margin:auto;padding:18px 12px 34px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.logo{display:block;width:220px;max-width:55vw;height:auto}
+.controls{display:flex;gap:6px;align-items:center}
+button,.back{border:2px solid #111;border-radius:10px;background:transparent;color:#111;min-height:38px;padding:7px 10px;font:800 .78rem Arial;text-decoration:none;cursor:pointer}
+.lang.active{background:#111;color:#fff}
+.card{background:var(--p);border:3px solid #111;border-radius:14px;padding:clamp(20px,4vw,32px)}
+h1{margin:0 0 22px;font-size:clamp(1.9rem,6vw,2.7rem)}
+p{line-height:1.58;margin:0 0 17px}
+.links{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px}
+.links a{color:#111;font-weight:800;text-decoration-thickness:2px;text-underline-offset:3px}
+.foot{text-align:center;font-size:.72rem;color:var(--m);margin-top:14px}
+.hide{display:none}
+@media(max-width:440px){.logo{width:175px}.top{align-items:flex-start}.controls{flex-wrap:wrap;justify-content:flex-end}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <img class="logo" src="data:image/webp;base64,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" alt="D Bingo">
+    <div class="controls">
+      <button id="deBtn" class="lang active" type="button">DE</button>
+      <button id="enBtn" class="lang" type="button">EN</button>
+      <a id="back" class="back" href="./">ZURÜCK</a>
+    </div>
+  </div>
+
+  <section class="card">
+    <div id="de">
+      <h1>Datenschutz</h1>
+      <p>Diese Website kann ohne Registrierung und ohne Benutzerkonto genutzt werden.</p>
+      <p>Beim Aufruf der Website können technisch erforderliche Verbindungsdaten, einschließlich der IP-Adresse, durch den Hosting-Anbieter <strong>GitHub Pages</strong> verarbeitet werden, damit die Website ausgeliefert werden kann.</p>
+      <p>Bahn Bingo speichert Spielstände und Spracheinstellungen ausschließlich lokal in deinem Browser.</p>
+      <p>Keine Werbung, kein Werbetracking und keine Weitergabe personenbezogener Daten zu Marketingzwecken.</p>
+      <p>Wir verwenden <strong>GoatCounter</strong> für anonyme Nutzungsstatistiken. Nach Angaben von GoatCounter werden keine Cookies verwendet und keine persönlichen Nutzerprofile erstellt. Die Statistik dient ausschließlich dazu, zu verstehen, wie häufig Bahn Bingo genutzt wird.</p>
+      <p>Eigene Texte, die du auf deiner Bingo-Karte einträgst, werden nicht an GoatCounter übertragen.</p>
+      <div class="links">
+        <a href="https://www.goatcounter.com/help/privacy" target="_blank" rel="noopener">GoatCounter Datenschutz</a>
+        <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub Datenschutz</a>
+      </div>
+    </div>
+
+    <div id="en" class="hide">
+      <h1>Privacy</h1>
+      <p>This website can be used without registration or a user account.</p>
+      <p>When the website is accessed, technically necessary connection data, including the IP address, may be processed by the hosting provider <strong>GitHub Pages</strong> in order to deliver the website.</p>
+      <p>Bahn Bingo stores game progress and language settings locally in your browser only.</p>
+      <p>No advertising, no advertising tracking, and no sharing of personal data for marketing purposes.</p>
+      <p>We use <strong>GoatCounter</strong> for anonymous usage statistics. According to GoatCounter, it does not use cookies and does not create personal user profiles. The statistics are used only to understand how often Bahn Bingo is used.</p>
+      <p>Custom text entered on your Bingo card is not sent to GoatCounter.</p>
+      <div class="links">
+        <a href="https://www.goatcounter.com/help/privacy" target="_blank" rel="noopener">GoatCounter Privacy</a>
+        <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub Privacy</a>
+      </div>
+    </div>
+  </section>
+
+  <div id="disclaimer" class="foot">Nicht mit einem Verkehrsunternehmen verbunden.</div>
+</main>
+<script>
+const de=document.getElementById("de"),en=document.getElementById("en"),deBtn=document.getElementById("deBtn"),enBtn=document.getElementById("enBtn"),back=document.getElementById("back"),disc=document.getElementById("disclaimer");
+function setLang(lang){
+  const german=lang==="de";
+  de.classList.toggle("hide",!german);en.classList.toggle("hide",german);
+  deBtn.classList.toggle("active",german);enBtn.classList.toggle("active",!german);
+  document.documentElement.lang=lang;
+  back.textContent=german?"ZURÜCK":"BACK";
+  disc.textContent=german?"Nicht mit einem Verkehrsunternehmen verbunden.":"Not affiliated with any transport operator.";
+}
+deBtn.onclick=()=>setLang("de");enBtn.onclick=()=>setLang("en");
+</script>
+</body>
+</html>
