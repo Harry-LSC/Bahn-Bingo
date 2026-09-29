@@ -28,9 +28,26 @@ function rarityCounts(size){if(size===3)return{common:5,uncommon:3,rare:0};if(si
 function makeState(size,token){const code=codeFor(size,token),r=rng(hash(code)),n=rarityCounts(size);let normals=shuffled([...shuffled(COMMON,r).slice(0,n.common),...shuffled(UNCOMMON,r).slice(0,n.uncommon),...shuffled(RARE,r).slice(0,n.rare)],r);let cells=normals.map(text=>({text,marked:false}));if(size%2){cells.splice(Math.floor(cells.length/2),0,{text:C,marked:false})}return{version:2,size,token,code,cells,custom:false,jokerText:C,jokerMarked:false,started:false,screen:"preview",won:false}}
 function generate(size=selectedSize){s=makeState(size,newToken());save();renderPreview();show("preview")}
 function loadFromCode(){const p=parseCode($("codeInput").value);if(!p){$("codeMsg").textContent="Kartennummer nicht erkannt.";return}$("codeMsg").textContent="";selectedSize=p.size;updateSizeButtons();s=makeState(p.size,p.token);save();renderPreview();show("preview")}
-function updateSizeButtons(){function cardLink(){const u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("card",s.code);return u.toString()}
-async function shareCardLink(btn){const url=cardLink();try{if(navigator.share){await navigator.share({title:"Bahn Bingo "+s.code,text:"Spiel meine Bahn-Bingo-Karte "+s.code,url});return}await navigator.clipboard.writeText(url);btn.textContent="LINK KOPIERT";setTimeout(()=>btn.textContent="LINK TEILEN",1200)}catch(e){if(e.name!=="AbortError"){try{await navigator.clipboard.writeText(url);btn.textContent="LINK KOPIERT";setTimeout(()=>btn.textContent="LINK TEILEN",1200)}catch(_){}}}}
-document.querySelectorAll(".sizeBtn").forEach(b=>b.classList.toggle("active",+b.dataset.size===selectedSize))}
+function updateSizeButtons(){document.querySelectorAll(".sizeBtn").forEach(b=>b.classList.toggle("active",+b.dataset.size===selectedSize))}
+function cardLink(){const u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("card",s.code);return u.toString()}
+async function shareCardLink(btn){
+  const url=cardLink();
+  try{
+    if(navigator.share){
+      await navigator.share({title:"Bahn Bingo "+s.code,text:"Spiel meine Bahn-Bingo-Karte "+s.code,url:url});
+      return;
+    }
+  }catch(e){
+    if(e.name==="AbortError") return;
+  }
+  try{
+    await navigator.clipboard.writeText(url);
+    btn.textContent="LINK KOPIERT";
+    setTimeout(()=>btn.textContent="LINK TEILEN",1400);
+  }catch(e){
+    window.prompt("Link kopieren:",url);
+  }
+}
 function centerIndex(){return s.size%2?Math.floor((s.size*s.size)/2):-1}
 function render(target,interactive){target.innerHTML="";target.style.gridTemplateColumns="repeat("+s.size+",1fr)";target.className="board s"+s.size;const ci=centerIndex();s.cells.forEach((c,i)=>{let b=document.createElement("button");b.className="cell"+(c.text.length>42?" long":"")+(i===ci?" center":"")+(c.marked?" marked":"");b.textContent=c.text;b.type="button";if(interactive)b.onclick=()=>toggle(i);else b.tabIndex=-1;target.appendChild(b)})}
 function renderJokers(interactive){const is4=s.size===4;["pJokerWrap","gJokerWrap"].forEach(id=>$(id).classList.toggle("hide",!is4));if(!is4)return;const text=s.custom?s.jokerText:C;$("pJoker").textContent=text;$("gJoker").textContent=text;$("gJoker").classList.toggle("marked",!!s.jokerMarked);$("gJoker").onclick=interactive?toggleExternalJoker:null}
